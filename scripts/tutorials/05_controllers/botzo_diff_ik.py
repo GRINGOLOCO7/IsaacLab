@@ -1,31 +1,10 @@
-# Copyright (c) 2022-2025, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
-# All rights reserved.
-#
-# SPDX-License-Identifier: BSD-3-Clause
-
-"""
-This script demonstrates how to use the differential inverse kinematics controller with the simulator.
-
-The differential IK controller can be configured in different modes. It uses the Jacobians computed by
-PhysX. This helps perform parallelized computation of the inverse kinematics.
-
-.. code-block:: bash
-
-    # Usage
-    ./isaaclab.sh -p scripts/tutorials/05_controllers/run_diff_ik.py
-
-"""
-
-"""Launch Isaac Sim Simulator first."""
-
 import argparse
 
 from isaaclab.app import AppLauncher
 
 # add argparse arguments
-parser = argparse.ArgumentParser(description="Tutorial on using the differential IK controller.")
-parser.add_argument("--robot", type=str, default="franka_panda", help="Name of the robot.")
-parser.add_argument("--num_envs", type=int, default=128, help="Number of environments to spawn.")
+parser = argparse.ArgumentParser(description="This script demonstrates using differential IK controller with Botzo quadruped robot.")
+parser.add_argument("--num_envs", type=int, default=1, help="Number of environments to spawn.")
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
 # parse the arguments
@@ -53,18 +32,15 @@ from isaaclab.utils.math import subtract_frame_transforms
 ##
 # Pre-defined configs
 ##
-from isaaclab_assets import FRANKA_PANDA_HIGH_PD_CFG, UR10_CFG  # isort:skip
+from isaaclab_assets.robots.botzo import BOTZO_CONFIG
 
-
-@configclass
-class TableTopSceneCfg(InteractiveSceneCfg):
+class NewRobotsSceneCfg(InteractiveSceneCfg):
     """Configuration for a cart-pole scene."""
 
     # ground plane
     ground = AssetBaseCfg(
         prim_path="/World/defaultGroundPlane",
-        spawn=sim_utils.GroundPlaneCfg(),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, -1.05)),
+        spawn=sim_utils.GroundPlaneCfg()
     )
 
     # lights
@@ -72,70 +48,55 @@ class TableTopSceneCfg(InteractiveSceneCfg):
         prim_path="/World/Light", spawn=sim_utils.DomeLightCfg(intensity=3000.0, color=(0.75, 0.75, 0.75))
     )
 
-    # mount
-    table = AssetBaseCfg(
-        prim_path="{ENV_REGEX_NS}/Table",
-        spawn=sim_utils.UsdFileCfg(
-            usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/Stand/stand_instanceable.usd", scale=(2.0, 2.0, 2.0)
-        ),
-    )
-
-    # articulation
-    if args_cli.robot == "franka_panda":
-        robot = FRANKA_PANDA_HIGH_PD_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-    elif args_cli.robot == "ur10":
-        robot = UR10_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-    else:
-        raise ValueError(f"Robot {args_cli.robot} is not supported. Valid: franka_panda, ur10")
-
+    # robot
+    Botzo = BOTZO_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Botzo")
 
 def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     """Runs the simulation loop."""
     # Extract scene entities
     # note: we only do this here for readability.
-    robot = scene["robot"]
+    robot = scene["Botzo"]
     # Debug: Print available body names to find the correct end-effector name
     print(f"[DEBUG] Available body names: {robot.body_names}")
     print(f"[DEBUG] Available joint names: {robot.joint_names}")
     '''
-    Available body names: ['panda_link0', 'panda_link1', 'panda_link2', 'panda_link3', 'panda_link4', 'panda_link5', 'panda_link6', 'panda_link7', 'panda_hand', 'panda_leftfinger', 'panda_rightfinger']
-    Available joint names: ['panda_joint1', 'panda_joint2', 'panda_joint3', 'panda_joint4', 'panda_joint5', 'panda_joint6', 'panda_joint7', 'panda_finger_joint1', 'panda_finger_joint2']
+    Available body names: ['base_link', 'BL_shoulder_servo_arm_v11', 'BR_shoulder_servo_arm_v11', 'FL_shoulder_servo_arm_v11', 'FR_shoulder_servo_arm_v11', 'BL_leg_knee_up_v11', 'BR_leg_knee_up_v11', 'FL_leg_knee_up_v11', 'FR_leg_knee_up_v11', 'BL_leg_ankle_v11', 'BR_leg_ankle_v11', 'FL_leg_ankle_v11', 'FR_leg_ankle_v11']
+    Available joint names: ['BL_shoulder_joint', 'BR_shoulder_joint', 'FL_shoulder_joint', 'FR_shoulder_joint', 'BL_femur_joint', 'BR_femur_joint', 'FL_femur_joint', 'FR_femur_joint', 'BL_knee_joint', 'Revolute_43', 'FL_knee_joint', 'FR_knee_joint']
     '''
-    '''
-    Available body names: ['base_link', 'shoulder_link', 'upper_arm_link', 'forearm_link', 'wrist_1_link', 'wrist_2_link', 'wrist_3_link', 'ee_link']
-    Available joint names: ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
-    '''
-
-    # Create controller
+    
+    # Create controller for 3-DOF leg (shoulder, femur, knee)
     diff_ik_cfg = DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls")
     diff_ik_controller = DifferentialIKController(diff_ik_cfg, num_envs=scene.num_envs, device=sim.device)
 
-    # Markers
+    # Markers for visualization
     frame_marker_cfg = FRAME_MARKER_CFG.copy()
     frame_marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
     ee_marker = VisualizationMarkers(frame_marker_cfg.replace(prim_path="/Visuals/ee_current"))
     goal_marker = VisualizationMarkers(frame_marker_cfg.replace(prim_path="/Visuals/ee_goal"))
 
-    # Define goals for the arm
+    # Define goals for the foot (relative to robot base)
+    # These should be reachable positions for the FR leg
+    # Format: [x, y, z, qx, qy, qz, qw] - position + quaternion orientation
     ee_goals = [
-        [0.5, 0.5, 0.7, 0.707, 0, 0.707, 0],
-        [0.5, -0.4, 0.6, 0.707, 0.707, 0.0, 0.0],
-        [0.5, 0, 0.5, 0.0, 1.0, 0.0, 0.0],
+        [0.2, -0.1, -0.3, 0.0, 0.0, 0.0, 1.0],   # Forward, right, down
+        [0.3, -0.1, -0.2, 0.0, 0.0, 0.0, 1.0],   # More forward, up
+        [0.1, -0.1, -0.4, 0.0, 0.0, 0.0, 1.0],   # Back, down
     ]
     ee_goals = torch.tensor(ee_goals, device=sim.device)
     # Track the given command
     current_goal_idx = 0
     # Create buffers to store actions
-    ik_commands = torch.zeros(scene.num_envs, diff_ik_controller.action_dim, device=robot.device)
+    ik_commands = torch.zeros(scene.num_envs, diff_ik_controller.action_dim, device=robot.device)  # 7D pose (3 pos + 4 quat)
     ik_commands[:] = ee_goals[current_goal_idx]
 
-    # Specify robot-specific parameters
-    if args_cli.robot == "franka_panda":
-        robot_entity_cfg = SceneEntityCfg("robot", joint_names=["panda_joint.*"], body_names=["panda_hand"])
-    elif args_cli.robot == "ur10":
-        robot_entity_cfg = SceneEntityCfg("robot", joint_names=[".*"], body_names=["ee_link"])
-    else:
-        raise ValueError(f"Robot {args_cli.robot} is not supported. Valid: franka_panda, ur10")
+    # Define robot-specific parameters for Botzo
+    # You'll need to specify which leg you want to control with IK
+    # For this example, let's control the Front Right (FR) leg
+    robot_entity_cfg = SceneEntityCfg(
+        "Botzo", 
+        joint_names=["FR_shoulder_joint", "FR_femur_joint", "FR_knee_joint"],  # FR leg joints
+        body_names=["FR_leg_knee_up_v11"]  # End-effector (ankle/foot) for FR leg        (or FR_tip_foot1)
+    )
     # Resolving the scene entities
     robot_entity_cfg.resolve(scene)
     # Obtain the frame index of the end-effector
@@ -152,7 +113,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     # Simulation loop
     while simulation_app.is_running():
         # reset
-        if count % 150 == 0:
+        if count % 300 == 0:  # Longer reset interval for quadruped
             # reset time
             count = 0
             # reset joint state
@@ -168,22 +129,37 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             diff_ik_controller.set_command(ik_commands)
             # change goal
             current_goal_idx = (current_goal_idx + 1) % len(ee_goals)
+            print(f"[INFO]: Switching to goal {current_goal_idx}: {ee_goals[current_goal_idx]}")
         else:
             # obtain quantities from simulation
-            jacobian = robot.root_physx_view.get_jacobians()[:, ee_jacobi_idx, :, robot_entity_cfg.joint_ids]
-            ee_pose_w = robot.data.body_pose_w[:, robot_entity_cfg.body_ids[0]]
-            root_pose_w = robot.data.root_pose_w
-            joint_pos = robot.data.joint_pos[:, robot_entity_cfg.joint_ids]
-            # compute frame in root frame
-            ee_pos_b, ee_quat_b = subtract_frame_transforms(
-                root_pose_w[:, 0:3], root_pose_w[:, 3:7], ee_pose_w[:, 0:3], ee_pose_w[:, 3:7]
-            )
-            # compute the joint commands
-            joint_pos_des = diff_ik_controller.compute(ee_pos_b, ee_quat_b, jacobian, joint_pos)
+            try:
+                jacobian = robot.root_physx_view.get_jacobians()[:, ee_jacobi_idx, :, robot_entity_cfg.joint_ids]
+                ee_pose_w = robot.data.body_pose_w[:, robot_entity_cfg.body_ids[0]]
+                root_pose_w = robot.data.root_pose_w
+                joint_pos = robot.data.joint_pos[:, robot_entity_cfg.joint_ids]
+                
+                # compute frame in root frame
+                ee_pos_b, ee_quat_b = subtract_frame_transforms(
+                    root_pose_w[:, 0:3], root_pose_w[:, 3:7], 
+                    ee_pose_w[:, 0:3], ee_pose_w[:, 3:7]
+                )
+                
+                # compute the joint commands
+                joint_pos_des = diff_ik_controller.compute(
+                    ee_pos_b, 
+                    ee_quat_b,  # Use actual end-effector orientation
+                    jacobian, 
+                    joint_pos
+                )
+            except Exception as e:
+                print(f"[WARNING]: IK computation failed: {e}")
+                # Fall back to default positions
+                joint_pos_des = robot.data.default_joint_pos[:, robot_entity_cfg.joint_ids].clone()
 
-        # apply actions
+        # Apply actions to the specific leg joints
         robot.set_joint_position_target(joint_pos_des, joint_ids=robot_entity_cfg.joint_ids)
         scene.write_data_to_sim()
+        
         # perform step
         sim.step()
         # update sim-time
@@ -191,11 +167,14 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         # update buffers
         scene.update(sim_dt)
 
-        # obtain quantities from simulation
-        ee_pose_w = robot.data.body_state_w[:, robot_entity_cfg.body_ids[0], 0:7]
-        # update marker positions
-        ee_marker.visualize(ee_pose_w[:, 0:3], ee_pose_w[:, 3:7])
-        goal_marker.visualize(ik_commands[:, 0:3] + scene.env_origins, ik_commands[:, 3:7])
+        # Update visualization markers
+        try:
+            ee_pose_w = robot.data.body_state_w[:, robot_entity_cfg.body_ids[0], 0:7]
+            # update marker positions
+            ee_marker.visualize(ee_pose_w[:, 0:3], ee_pose_w[:, 3:7])
+            goal_marker.visualize(ik_commands[:, 0:3] + scene.env_origins, ik_commands[:, 3:7])
+        except Exception as e:
+            print(f"[WARNING]: Visualization failed: {e}")
 
 
 def main():
@@ -206,7 +185,7 @@ def main():
     # Set main camera
     sim.set_camera_view([2.5, 2.5, 2.5], [0.0, 0.0, 0.0])
     # Design scene
-    scene_cfg = TableTopSceneCfg(num_envs=args_cli.num_envs, env_spacing=2.0)
+    scene_cfg = NewRobotsSceneCfg(num_envs=args_cli.num_envs, env_spacing=2.0)
     scene = InteractiveScene(scene_cfg)
     # Play the simulator
     sim.reset()

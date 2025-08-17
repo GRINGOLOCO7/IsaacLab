@@ -31,6 +31,48 @@ from isaaclab.assets.articulation import ArticulationCfg
 from isaaclab.scene import InteractiveScene, InteractiveSceneCfg
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
+
+from isaaclab_assets.robots.botzo import BOTZO_CONFIG # source\isaaclab_assets\isaaclab_assets\robots\botzo.py
+#BOTZO_CONFIG = ArticulationCfg(
+#    spawn=sim_utils.UsdFileCfg(
+#        usd_path="C:\\Users\\grego\\Desktop\\GRINGO\\botzo\\botzo\\simulation\\reinforcement_learning\\botzo_USD\\botzo_USD.usd"
+#    ),
+#    init_state=ArticulationCfg.InitialStateCfg(
+#        joint_pos={
+#            "BL_shoulder_joint": 0.0,
+#            "BL_femur_joint": 0.0,
+#            "BL_knee_joint": 0.0,
+#
+#            "BR_shoulder_joint": 0.0,
+#            "BR_femur_joint": 0.0,
+#            "Revolute_43": 0.0,
+#
+#            "FL_shoulder_joint": 0.0,
+#            "FL_femur_joint": 0.0,
+#            "FL_knee_joint": 0.0,
+#
+#            "FR_shoulder_joint": 0.0,
+#            "FR_femur_joint": 0.0,
+#            "FR_knee_joint": 0.0,
+#        },
+#        pos=(0.0, 0.0, 0.0),
+#    ),
+#    actuators={
+#        "BL_shoulder_act": ImplicitActuatorCfg(joint_names_expr=["BL_shoulder_joint"],effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "BL_femur_act": ImplicitActuatorCfg(joint_names_expr=["BL_femur_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "BL_knee_act": ImplicitActuatorCfg(joint_names_expr=["BL_knee_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "BR_shoulder_act": ImplicitActuatorCfg(joint_names_expr=["BR_shoulder_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "BR_femur_act": ImplicitActuatorCfg(joint_names_expr=["BR_femur_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "Revolute_43_act": ImplicitActuatorCfg(joint_names_expr=["Revolute_43"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "FL_shoulder_act": ImplicitActuatorCfg(joint_names_expr=["FL_shoulder_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "FL_femur_act": ImplicitActuatorCfg(joint_names_expr=["FL_femur_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "FL_knee_act": ImplicitActuatorCfg(joint_names_expr=["FL_knee_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "FR_shoulder_act": ImplicitActuatorCfg(joint_names_expr=["FR_shoulder_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "FR_femur_act": ImplicitActuatorCfg(joint_names_expr=["FR_femur_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#        "FR_knee_act": ImplicitActuatorCfg(joint_names_expr=["FR_knee_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
+#    },
+#)
+
 JETBOT_CONFIG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Robots/Jetbot/jetbot.usd"),
     actuators={"wheel_acts": ImplicitActuatorCfg(joint_names_expr=[".*"], damping=None, stiffness=None)},
@@ -96,6 +138,7 @@ class NewRobotsSceneCfg(InteractiveSceneCfg):
     # robot
     Jetbot = JETBOT_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Jetbot")
     Dofbot = DOFBOT_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Dofbot")
+    Botzo = BOTZO_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Botzo")
 
 
 def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
@@ -113,12 +156,16 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             root_jetbot_state[:, :3] += scene.env_origins
             root_dofbot_state = scene["Dofbot"].data.default_root_state.clone()
             root_dofbot_state[:, :3] += scene.env_origins
+            robot_botzo_state = scene["Botzo"].data.default_root_state.clone()
+            robot_botzo_state[:, :3] += scene.env_origins
 
             # copy the default root state to the sim for the jetbot's orientation and velocity
             scene["Jetbot"].write_root_pose_to_sim(root_jetbot_state[:, :7])
             scene["Jetbot"].write_root_velocity_to_sim(root_jetbot_state[:, 7:])
             scene["Dofbot"].write_root_pose_to_sim(root_dofbot_state[:, :7])
             scene["Dofbot"].write_root_velocity_to_sim(root_dofbot_state[:, 7:])
+            scene["Botzo"].write_root_pose_to_sim(robot_botzo_state[:, :7])
+            scene["Botzo"].write_root_velocity_to_sim(robot_botzo_state[:, 7:])
 
             # copy the default joint states to the sim
             joint_pos, joint_vel = (
@@ -131,6 +178,11 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
                 scene["Dofbot"].data.default_joint_vel.clone(),
             )
             scene["Dofbot"].write_joint_state_to_sim(joint_pos, joint_vel)
+            joint_pos, joint_vel = (
+                scene["Botzo"].data.default_joint_pos.clone(),
+                scene["Botzo"].data.default_joint_vel.clone(),
+            )
+            scene["Botzo"].write_joint_state_to_sim(joint_pos, joint_vel)
             # clear internal buffers
             scene.reset()
             print("[INFO]: Resetting Jetbot and Dofbot state...")
@@ -149,6 +201,11 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         wave_action = scene["Dofbot"].data.default_joint_pos
         wave_action[:, 0:4] = 0.25 * np.sin(2 * np.pi * 0.5 * sim_time)
         scene["Dofbot"].set_joint_position_target(wave_action)
+        # move botzo
+        botzo_action = scene["Botzo"].data.default_joint_pos
+        botzo_action[:, 0:3] = 0.25 * np.sin(2 * np.pi * 0.5 * sim_time)
+        botzo_action[:, 3:6] = 0.25 * np.cos(2 * np.pi * 0.5 * sim_time)
+        scene["Botzo"].set_joint_position_target(botzo_action)
 
         scene.write_data_to_sim()
         sim.step()
