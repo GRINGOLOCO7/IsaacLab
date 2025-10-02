@@ -15,6 +15,7 @@ velocity_limit_sim *= 10
 BOTZO_CONFIG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path="C:\\Users\\grego\\Desktop\\GRINGO\\botzo\\botzo\\simulation\\reinforcement_learning\\botzo_USD\\botzo_USD.usd",
+        activate_contact_sensors=True,
         scale=(0.3, 0.3, 0.3),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
