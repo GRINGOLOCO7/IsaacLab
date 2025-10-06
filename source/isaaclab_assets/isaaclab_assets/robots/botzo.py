@@ -36,7 +36,7 @@ BOTZO_CONFIG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.5),
+        pos=(0.0, 0.0, 0.35),
         joint_pos={
             ".*HAA": 0.0,
             ".*HFE": 0.8,
