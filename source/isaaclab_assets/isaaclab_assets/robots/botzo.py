@@ -19,8 +19,8 @@ BOTZO_CONFIG = ArticulationCfg(
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
             enabled_self_collisions=False,
-            solver_position_iteration_count=12,
-            solver_velocity_iteration_count=4,
+            solver_position_iteration_count=4, #20,
+            solver_velocity_iteration_count=0, #8,
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
@@ -37,13 +37,21 @@ BOTZO_CONFIG = ArticulationCfg(
     ),
     soft_joint_pos_limit_factor=0.9,
     actuators={
-        "legs": ImplicitActuatorCfg(
-            joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
-            effort_limit_sim=1e6,     # increased from 3e5
-            velocity_limit=1000.0,
-            stiffness=5e6,            # 5x stronger
-            damping=100.0,            # much higher damping
-        ),
+        # "legs": ImplicitActuatorCfg(
+        #     joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
+        #     effort_limit_sim=1e6,     # increased from 3e5
+        #     velocity_limit=1000.0,
+        #     stiffness=5e6,            # 5x stronger
+        #     damping=100.0,            # much higher damping
+        # ),
+        # "foot": ImplicitActuatorCfg(
+        #     joint_names_expr=[".*_FOOT"],
+        #     effort_limit_sim=10.0,
+        #     velocity_limit_sim=10.0,
+        #     stiffness=50.0,
+        #     damping=1.0,
+        # ),
+
         # "legs": DCMotorCfg(
         #     joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
         #     effort_limit=33.5,
@@ -53,12 +61,20 @@ BOTZO_CONFIG = ArticulationCfg(
         #     damping=0.5,
         #     friction=0.0,
         # ),
+
+        "legs": ImplicitActuatorCfg(
+            joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
+            effort_limit_sim=5000.0,
+            velocity_limit=100.0,
+            stiffness=15000.0,
+            damping=1000.0,
+        ),
         "foot": ImplicitActuatorCfg(
             joint_names_expr=[".*_FOOT"],
-            effort_limit_sim=10.0,
-            velocity_limit_sim=10.0,
-            stiffness=50.0,
-            damping=1.0,
+            effort_limit_sim=500.0,
+            velocity_limit_sim=50.0,
+            stiffness=5000.0,
+            damping=100.0,
         ),
     },
 

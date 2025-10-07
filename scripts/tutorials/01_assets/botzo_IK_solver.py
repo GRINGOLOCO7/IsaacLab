@@ -88,38 +88,72 @@ joint_ids = {
     }
 }
 
-def real_sim_angle(angle, id):
-  if id == 11:                # RH_HAA (shoulder) 
-    sim_angle = angle - 90
-  elif id == 14:               # RH_HFE (femur)
-    sim_angle = 90 - angle
-  elif id == 15:               # RH_KFE (knee)
-    sim_angle = angle - 90
+def real_sim_angle(angle, id, robot="botzo"):
+  if robot == "custom":
+    if id == 11:                # RH_HAA (shoulder) 
+      sim_angle = angle - 90
+    elif id == 14:               # RH_HFE (femur)
+      sim_angle = angle  - 90
+    elif id == 15:               # RH_KFE (knee)
+      sim_angle = angle
 
-  elif id == 3:              # RF_HAA (shoulder)
-    sim_angle = angle - 90
-  elif id == 6:              # RF_HFE (femur)
-    sim_angle = 90 - angle
-  elif id == 7:              # RF_KFE (knee)
-    sim_angle = angle - 90
+    elif id == 3:              # RF_HAA (shoulder)
+      sim_angle = angle - 90
+    elif id == 6:              # RF_HFE (femur)
+      sim_angle = angle - 90
+    elif id == 7:              # RF_KFE (knee)
+      sim_angle = angle
 
-  elif id == 19:              # LH_HAA (shoulder)
-    sim_angle = angle - 90
-  elif id == 22:              # LH_HFE (femur)
-    sim_angle = 90 - angle
-  elif id == 23:              # LH_KFE (knee)
-    sim_angle = angle - 90
+    elif id == 19:              # LH_HAA (shoulder)
+      sim_angle = angle - 90
+    elif id == 22:              # LH_HFE (femur)
+      sim_angle = angle  - 90
+    elif id == 23:              # LH_KFE (knee)
+      sim_angle = angle
 
-  elif id == 27:              # LF_HAA (shoulder)
-    sim_angle = angle - 90
-  elif id == 30:              # LF_HFE (femur)
-    sim_angle = 90 - angle
-  elif id == 31:              # LF_KFE (knee)
-    sim_angle = angle - 90
+    elif id == 27:              # LF_HAA (shoulder)
+      sim_angle = angle - 90
+    elif id == 30:              # LF_HFE (femur)
+      sim_angle = angle  - 90
+    elif id == 31:              # LF_KFE (knee)
+      sim_angle = angle
 
-  else:
-    sim_angle = angle
+    else:
+      sim_angle = angle
+
+  elif robot == "botzo":
+    if id == 11:                # RH_HAA (shoulder) 
+      sim_angle = angle - 90
+    elif id == 14:               # RH_HFE (femur)
+      sim_angle = 90 - angle
+    elif id == 15:               # RH_KFE (knee)
+      sim_angle = angle - 90
+
+    elif id == 3:              # RF_HAA (shoulder)
+      sim_angle = angle - 90
+    elif id == 6:              # RF_HFE (femur)
+      sim_angle = 90 - angle
+    elif id == 7:              # RF_KFE (knee)
+      sim_angle = angle - 90
+
+    elif id == 19:              # LH_HAA (shoulder)
+      sim_angle = angle - 90
+    elif id == 22:              # LH_HFE (femur)
+      sim_angle = 90 - angle
+    elif id == 23:              # LH_KFE (knee)
+      sim_angle = angle - 90
+
+    elif id == 27:              # LF_HAA (shoulder)
+      sim_angle = angle - 90
+    elif id == 30:              # LF_HFE (femur)
+      sim_angle = 90 - angle
+    elif id == 31:              # LF_KFE (knee)
+      sim_angle = angle - 90
+
+    else:
+      sim_angle = angle
   return sim_angle
+
 
 def rad2deg(rads):
   return [rads[0]*180/np.pi, rads[1]*180/np.pi, rads[2]*180/np.pi]

@@ -21,6 +21,7 @@ from isaaclab.app import AppLauncher
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="This script demonstrates different legged robots.")
+parser.add_argument("--robot", type=str, default="botzo", help="Chose robot between Botzo or Custom or Anymal")
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
 # parse the arguments
@@ -45,6 +46,7 @@ from isaaclab.assets import Articulation
 ##
 from isaaclab_assets.robots.anymal import ANYMAL_C_CFG
 from isaaclab_assets.robots.botzo import BOTZO_CONFIG
+from isaaclab_assets.robots.custom_quad import CUSTOM_QUAD_CFG
 
 def define_origins(num_origins: int, spacing: float) -> list[list[float]]:
     """Defines the origins of the scene."""
@@ -76,8 +78,12 @@ def design_scene() -> tuple[dict, list[list[float]]]:
     # Origin 2 with Anymal C
     prim_utils.create_prim("/World/Origin2", "Xform", translation=origins[0])
     # -- Robot
-    #anymal_c = Articulation(BOTZO_CONFIG.replace(prim_path="/World/Origin2/Robot"))
-    anymal_c = Articulation(ANYMAL_C_CFG.replace(prim_path="/World/Origin2/AnymalC"))
+    if args_cli.robot.lower() == "botzo":
+        anymal_c = Articulation(BOTZO_CONFIG.replace(prim_path="/World/Origin2/Robot"))
+    elif args_cli.robot.lower() == "custom":
+        anymal_c = Articulation(CUSTOM_QUAD_CFG.replace(prim_path="/World/Origin2/Robot"))
+    elif args_cli.robot.lower() == "anymal":
+        anymal_c = Articulation(ANYMAL_C_CFG.replace(prim_path="/World/Origin2/Robot"))
 
     # return the scene information
     scene_entities = {
