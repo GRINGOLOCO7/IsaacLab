@@ -79,3 +79,12 @@ BOTZO_CONFIG = ArticulationCfg(
     },
 
 )
+
+'''
+| Goal                          | What to change                    | Direction                       |
+| ----------------------------- | --------------------------------- | ------------------------------- |
+| Robot can’t stand / collapses | ↑ stiffness or ↑ effort_limit_sim | increase by ×2                  |
+| Vibrates or jitters           | ↓ stiffness or ↑ damping          | halve stiffness, double damping |
+| Movements feel “sluggish”     | ↓ damping                         | lower by 20–50%                 |
+| Movements explode             | ↓ stiffness and ↓ dt              | start 1e3–1e4 range             |
+'''
