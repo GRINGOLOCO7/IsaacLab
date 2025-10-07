@@ -4,18 +4,6 @@ from isaaclab.assets.articulation import ArticulationCfg
 import os
 from math import pi
 
-BOTZO_ACTUATOR_CFG = ImplicitActuatorCfg(
-    joint_names_expr=[
-        ".*HAA",  # hip abduction/adduction
-        ".*HFE",  # hip flexion/extension
-        ".*KFE",  # knee flexion/extension
-    ],
-    effort_limit=80.0,      # ← allows enough torque to hold weight (try 400–800)
-    velocity_limit=7.0,     # ← safe high limit
-    stiffness=40.0,        # ← stronger position control (acts like motor Kp)
-    damping=5.0,            # ← reasonable damping (acts like Kd)
-)
-
 BOTZO_CONFIG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path="C:\\Users\\grego\\Desktop\\GRINGO\\botzo\\botzo\\CAD_files\\URDF\\BOTZO_URDF_description\\urdf\\BOTZO_URDF\\BOTZO_URDF.usd",
@@ -36,25 +24,42 @@ BOTZO_CONFIG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.35),
+        pos=(0.0, 0.0, 0.1),
         joint_pos={
-            ".*HAA": 0.0,
-            ".*HFE": 0.8,
-            ".*KFE": 0.0,
-            ".*FOOT": 0.0,
+            ".*_HAA": 0.0,
+            ".*_HFE": 0.8,
+            ".*_KFE": 0.0,
+            ".*_FOOT": 0.0,
         },
         joint_vel={".*": 0.0},
+        # ROTETE ROBOT UPSIDE DOWN
+        #rot=(0.0, 1.0, 0.0, 0.0),
     ),
     soft_joint_pos_limit_factor=0.9,
     actuators={
-        "legs": DCMotorCfg(
-            joint_names_expr=[".*HAA", ".*HFE", ".*KFE"],
-            effort_limit=60.0,
-            saturation_effort=80.0,
-            velocity_limit=10.0,
-            stiffness={".*": 10.0},
-            damping={".*": 0.2},
-            friction={".*": 0.05},
+        "legs": ImplicitActuatorCfg(
+            joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
+            effort_limit_sim=1e6,     # increased from 3e5
+            velocity_limit=1000.0,
+            stiffness=5e6,            # 5x stronger
+            damping=100.0,            # much higher damping
+        ),
+        # "legs": DCMotorCfg(
+        #     joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
+        #     effort_limit=33.5,
+        #     saturation_effort=33.5,
+        #     velocity_limit=21.0,
+        #     stiffness=25.0,
+        #     damping=0.5,
+        #     friction=0.0,
+        # ),
+        "foot": ImplicitActuatorCfg(
+            joint_names_expr=[".*_FOOT"],
+            effort_limit_sim=10.0,
+            velocity_limit_sim=10.0,
+            stiffness=50.0,
+            damping=1.0,
         ),
     },
+
 )

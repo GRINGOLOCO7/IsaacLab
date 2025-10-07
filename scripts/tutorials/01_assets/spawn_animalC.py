@@ -44,6 +44,7 @@ from isaaclab.assets import Articulation
 # Pre-defined configs
 ##
 from isaaclab_assets.robots.anymal import ANYMAL_C_CFG
+from isaaclab_assets.robots.botzo import BOTZO_CONFIG
 
 def define_origins(num_origins: int, spacing: float) -> list[list[float]]:
     """Defines the origins of the scene."""
@@ -75,7 +76,8 @@ def design_scene() -> tuple[dict, list[list[float]]]:
     # Origin 2 with Anymal C
     prim_utils.create_prim("/World/Origin2", "Xform", translation=origins[0])
     # -- Robot
-    anymal_c = Articulation(ANYMAL_C_CFG.replace(prim_path="/World/Origin2/Robot"))
+    #anymal_c = Articulation(BOTZO_CONFIG.replace(prim_path="/World/Origin2/Robot"))
+    anymal_c = Articulation(ANYMAL_C_CFG.replace(prim_path="/World/Origin2/AnymalC"))
 
     # return the scene information
     scene_entities = {
@@ -93,22 +95,31 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articula
     # Simulate physics
     while simulation_app.is_running():
         # reset
-        # reset counters
-        sim_time = 0.0
-        count = 0
-        # reset robots
-        for index, robot in enumerate(entities.values()):
-            # root state
-            root_state = robot.data.default_root_state.clone()
-            root_state[:, :3] += origins[index]
-            robot.write_root_pose_to_sim(root_state[:, :7])
-            robot.write_root_velocity_to_sim(root_state[:, 7:])
-            # joint state
-            joint_pos, joint_vel = robot.data.default_joint_pos.clone(), robot.data.default_joint_vel.clone()
-            robot.write_joint_state_to_sim(joint_pos, joint_vel)
-            # reset the internal state
-            robot.reset()
-            
+        if count % 200 == 0:
+            # reset counters
+            sim_time = 0.0
+            count = 0
+            # reset robots
+            for index, robot in enumerate(entities.values()):
+                # root state
+                root_state = robot.data.default_root_state.clone()
+                root_state[:, :3] += origins[index]
+                robot.write_root_pose_to_sim(root_state[:, :7])
+                robot.write_root_velocity_to_sim(root_state[:, 7:])
+                # joint state
+                joint_pos, joint_vel = robot.data.default_joint_pos.clone(), robot.data.default_joint_vel.clone()
+                robot.write_joint_state_to_sim(joint_pos, joint_vel)
+                # reset the internal state
+                robot.reset()
+            print("[INFO]: Resetting robots state...")
+        # apply default actions to the quadrupedal robots
+        for robot in entities.values():
+            # generate random joint positions
+            joint_pos_target = robot.data.default_joint_pos + torch.randn_like(robot.data.joint_pos) * 0.1
+            # apply action to the robot
+            robot.set_joint_position_target(joint_pos_target)
+            # write data to sim
+            robot.write_data_to_sim()
         # perform step
         sim.step()
         # update sim-time

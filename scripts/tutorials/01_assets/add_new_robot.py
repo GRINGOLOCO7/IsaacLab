@@ -29,49 +29,10 @@ from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import AssetBaseCfg
 from isaaclab.assets.articulation import ArticulationCfg
 from isaaclab.scene import InteractiveScene, InteractiveSceneCfg
+
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
+from isaaclab_assets.robots.botzo import BOTZO_CONFIG
 
-
-from isaaclab_assets.robots.botzo import BOTZO_CONFIG # source\isaaclab_assets\isaaclab_assets\robots\botzo.py
-#BOTZO_CONFIG = ArticulationCfg(
-#    spawn=sim_utils.UsdFileCfg(
-#        usd_path="C:\\Users\\grego\\Desktop\\GRINGO\\botzo\\botzo\\simulation\\reinforcement_learning\\botzo_USD\\botzo_USD.usd"
-#    ),
-#    init_state=ArticulationCfg.InitialStateCfg(
-#        joint_pos={
-#            "BL_shoulder_joint": 0.0,
-#            "BL_femur_joint": 0.0,
-#            "BL_knee_joint": 0.0,
-#
-#            "BR_shoulder_joint": 0.0,
-#            "BR_femur_joint": 0.0,
-#            "Revolute_43": 0.0,
-#
-#            "FL_shoulder_joint": 0.0,
-#            "FL_femur_joint": 0.0,
-#            "FL_knee_joint": 0.0,
-#
-#            "FR_shoulder_joint": 0.0,
-#            "FR_femur_joint": 0.0,
-#            "FR_knee_joint": 0.0,
-#        },
-#        pos=(0.0, 0.0, 0.0),
-#    ),
-#    actuators={
-#        "BL_shoulder_act": ImplicitActuatorCfg(joint_names_expr=["BL_shoulder_joint"],effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "BL_femur_act": ImplicitActuatorCfg(joint_names_expr=["BL_femur_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "BL_knee_act": ImplicitActuatorCfg(joint_names_expr=["BL_knee_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "BR_shoulder_act": ImplicitActuatorCfg(joint_names_expr=["BR_shoulder_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "BR_femur_act": ImplicitActuatorCfg(joint_names_expr=["BR_femur_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "Revolute_43_act": ImplicitActuatorCfg(joint_names_expr=["Revolute_43"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "FL_shoulder_act": ImplicitActuatorCfg(joint_names_expr=["FL_shoulder_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "FL_femur_act": ImplicitActuatorCfg(joint_names_expr=["FL_femur_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "FL_knee_act": ImplicitActuatorCfg(joint_names_expr=["FL_knee_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "FR_shoulder_act": ImplicitActuatorCfg(joint_names_expr=["FR_shoulder_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "FR_femur_act": ImplicitActuatorCfg(joint_names_expr=["FR_femur_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#        "FR_knee_act": ImplicitActuatorCfg(joint_names_expr=["FR_knee_joint"], effort_limit_sim=100.0, velocity_limit_sim=100.0, stiffness=10000.0, damping=100.0),
-#    },
-#)
 
 JETBOT_CONFIG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Robots/Jetbot/jetbot.usd"),
@@ -136,9 +97,9 @@ class NewRobotsSceneCfg(InteractiveSceneCfg):
     )
 
     # robot
-    Jetbot = JETBOT_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Jetbot")
-    Dofbot = DOFBOT_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Dofbot")
-    Botzo = BOTZO_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Botzo")
+    Jetbot = JETBOT_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Jetbot", init_state=ArticulationCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)))  # center
+    Dofbot = DOFBOT_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Dofbot", init_state=ArticulationCfg.InitialStateCfg(pos=(0.5, 0.0, 0.0)))  # right
+    Botzo = BOTZO_CONFIG.replace(prim_path="{ENV_REGEX_NS}/Botzo", init_state=ArticulationCfg.InitialStateCfg(pos=(-0.5, 0.0, 0.0)))  # center
 
 
 def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
