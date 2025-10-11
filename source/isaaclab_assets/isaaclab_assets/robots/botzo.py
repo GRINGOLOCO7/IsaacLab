@@ -19,20 +19,20 @@ BOTZO_CONFIG = ArticulationCfg(
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
             enabled_self_collisions=False,
-            solver_position_iteration_count=4, #20,
-            solver_velocity_iteration_count=0, #8,
+            solver_position_iteration_count=20, #20,
+            solver_velocity_iteration_count=8, #8,
         ),
+        scale=(1.5, 1.5, 1.5),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.1),
         joint_pos={
             ".*_HAA": 0.0,
-            ".*_HFE": 0.8,
+            ".*_HFE": 0.86,
             ".*_KFE": 0.0,
-            ".*_FOOT": 0.0,
         },
         joint_vel={".*": 0.0},
-        # ROTETE ROBOT UPSIDE DOWN
+        # ROTATE ROBOT UPSIDE DOWN
         #rot=(0.0, 1.0, 0.0, 0.0),
     ),
     soft_joint_pos_limit_factor=0.9,
@@ -62,19 +62,22 @@ BOTZO_CONFIG = ArticulationCfg(
         #     friction=0.0,
         # ),
 
-        "legs": ImplicitActuatorCfg(
+        # "legs": ImplicitActuatorCfg(
+        #     joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
+        #     effort_limit_sim=5000.0,
+        #     velocity_limit=100.0,
+        #     stiffness=15000.0,
+        #     damping=1000.0,
+        # ),
+
+        "base_legs": DCMotorCfg(
             joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
-            effort_limit_sim=5000.0,
-            velocity_limit=100.0,
-            stiffness=15000.0,
-            damping=1000.0,
-        ),
-        "foot": ImplicitActuatorCfg(
-            joint_names_expr=[".*_FOOT"],
-            effort_limit_sim=500.0,
-            velocity_limit_sim=50.0,
-            stiffness=5000.0,
-            damping=100.0,
+            effort_limit=2.5,          # Nm (≈ 25 kg·cm)
+            saturation_effort=2.5,     # Nm
+            velocity_limit=7.5,        # rad/s (≈ 0.13 s/60°)
+            stiffness=130.0,            # servo tries to hold position rigidly
+            damping=1.0,               # slightly more damping due to gear friction
+            friction=0.1,              # internal gear friction
         ),
     },
 

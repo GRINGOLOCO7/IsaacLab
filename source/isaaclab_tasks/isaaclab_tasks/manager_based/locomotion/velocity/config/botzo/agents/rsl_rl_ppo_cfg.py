@@ -22,13 +22,13 @@ class BotzoRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         activation="elu",
     )
     algorithm = RslRlPpoAlgorithmCfg(
-        value_loss_coef=0.5, #1.0
+        value_loss_coef=1.0,
         use_clipped_value_loss=True,
         clip_param=0.2,
-        entropy_coef=0.0025,
+        entropy_coef=0.01,
         num_learning_epochs=5,
         num_mini_batches=4,
-        learning_rate=0.005, #1.0e-3
+        learning_rate=1.0e-3, #0.005, #1.0e-3
         schedule="adaptive",
         gamma=0.99,
         lam=0.95,

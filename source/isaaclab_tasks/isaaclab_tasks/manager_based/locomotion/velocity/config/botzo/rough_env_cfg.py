@@ -47,6 +47,7 @@ class BotzoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
                 "yaw": (0.0, 0.0),
             },
         }
+        self.events.base_com = None
 
         # rewards => MOST IMPORTANT TO TUNE (REWARDS ARE SET IN "velocity_env_cfg.py". CHECK ALSO "VELOCITY/MDP/REWARDS.PY" TO SEE PREDEFINED REWARDS IN ISAAC LAB)
         self.rewards.feet_air_time.params["sensor_cfg"].body_names = ".*_FOOT"
