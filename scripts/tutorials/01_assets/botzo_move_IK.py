@@ -107,22 +107,22 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         #else:
             #print("position reached, pass to new target")
             # calculate angles
-        FR_s_f_t = legIK(forward_targets_FR_BL[idx][0], forward_targets_FR_BL[idx][1], forward_targets_FR_BL[idx][2])
+        FR_s_f_t = legIK(forward_targets_FR_BL[idx][2], forward_targets_FR_BL[idx][1], forward_targets_FR_BL[idx][0])
         FR_angle_shoulder, FR_angle_femur, FR_angle_knee = FR_s_f_t
         target_FR_angle_shoulder = math.radians(real_sim_angle(FR_angle_shoulder,joint_ids["FR"]["shoulder"], robot=args_cli.robot.lower()))
         target_FR_angle_femur = math.radians(real_sim_angle(FR_angle_femur, joint_ids["FR"]["femur"], robot=args_cli.robot.lower()))
         target_FR_angle_knee = math.radians(real_sim_angle(FR_angle_knee, joint_ids["FR"]["knee"], robot=args_cli.robot.lower()))
-        FL_s_f_t = legIK(forward_targets_FL_BR[idx][0], forward_targets_FL_BR[idx][1], forward_targets_FL_BR[idx][2])
+        FL_s_f_t = legIK(forward_targets_FL_BR[idx][2], forward_targets_FL_BR[idx][1], forward_targets_FL_BR[idx][0])
         FL_angle_shoulder, FL_angle_femur, FL_angle_knee = FL_s_f_t
         target_FL_angle_shoulder = math.radians(real_sim_angle(FL_angle_shoulder,joint_ids["FL"]["shoulder"], robot=args_cli.robot.lower()))
         target_FL_angle_femur = math.radians(real_sim_angle(FL_angle_femur, joint_ids["FL"]["femur"], robot=args_cli.robot.lower()))
         target_FL_angle_knee = math.radians(real_sim_angle(FL_angle_knee, joint_ids["FL"]["knee"], robot=args_cli.robot.lower()))
-        BR_s_f_t = legIK(forward_targets_FL_BR[idx][0], forward_targets_FL_BR[idx][1], forward_targets_FL_BR[idx][2])
+        BR_s_f_t = legIK(forward_targets_FL_BR[idx][2], forward_targets_FL_BR[idx][1], forward_targets_FL_BR[idx][0])
         BR_angle_shoulder, BR_angle_femur, BR_angle_knee = BR_s_f_t
         target_BR_angle_shoulder = math.radians(real_sim_angle(BR_angle_shoulder,joint_ids["BR"]["shoulder"], robot=args_cli.robot.lower()))
         target_BR_angle_femur = math.radians(real_sim_angle(BR_angle_femur, joint_ids["BR"]["femur"], robot=args_cli.robot.lower()))
         target_BR_angle_knee = math.radians(real_sim_angle(BR_angle_knee, joint_ids["BR"]["knee"], robot=args_cli.robot.lower()))
-        BL_s_f_t = legIK(forward_targets_FR_BL[idx][0], forward_targets_FR_BL[idx][1], forward_targets_FR_BL[idx][2])
+        BL_s_f_t = legIK(forward_targets_FR_BL[idx][2], forward_targets_FR_BL[idx][1], forward_targets_FR_BL[idx][0])
         BL_angle_shoulder, BL_angle_femur, BL_angle_knee = BL_s_f_t
         target_BL_angle_shoulder = math.radians(real_sim_angle(BL_angle_shoulder,joint_ids["BL"]["shoulder"], robot=args_cli.robot.lower()))
         target_BL_angle_femur = math.radians(real_sim_angle(BL_angle_femur, joint_ids["BL"]["femur"], robot=args_cli.robot.lower()))

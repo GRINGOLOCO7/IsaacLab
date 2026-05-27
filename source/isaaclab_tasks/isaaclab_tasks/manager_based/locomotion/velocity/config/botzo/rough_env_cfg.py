@@ -35,7 +35,7 @@ class BotzoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.events.add_base_mass.params["mass_distribution_params"] = (-1.0, 3.0)
         self.events.add_base_mass.params["asset_cfg"].body_names = "base"
         self.events.base_external_force_torque.params["asset_cfg"].body_names = "base"
-        self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
+        self.events.reset_robot_joints.params["position_range"] = (0.95, 1.05) #(1.0, 1.0)
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
             "velocity_range": {
@@ -50,8 +50,8 @@ class BotzoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.events.base_com = None
 
         # rewards => MOST IMPORTANT TO TUNE (REWARDS ARE SET IN "velocity_env_cfg.py". CHECK ALSO "VELOCITY/MDP/REWARDS.PY" TO SEE PREDEFINED REWARDS IN ISAAC LAB)
-        self.rewards.feet_air_time.params["sensor_cfg"].body_names = ".*_FOOT"
-        self.rewards.feet_air_time.weight = 0.01
+        self.rewards.feet_air_time.params["sensor_cfg"].body_names = ".*SHANK|.*FOOT|None|.*tibia"
+        self.rewards.feet_air_time.weight = 0.02
         self.rewards.undesired_contacts = None
         self.rewards.dof_torques_l2.weight = -0.0002
         self.rewards.track_lin_vel_xy_exp.weight = 1.5
@@ -59,7 +59,9 @@ class BotzoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.dof_acc_l2.weight = -2.5e-7
 
         # terminations
+        #self.terminations.base_contact = None
         self.terminations.base_contact.params["sensor_cfg"].body_names = "base"
+        self.terminations.base_contact.params["threshold"] = 10
 
 
 @configclass

@@ -6,7 +6,7 @@ from math import pi
 
 BOTZO_CONFIG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path="C:\\Users\\grego\\Desktop\\GRINGO\\botzo\\botzo\\CAD_files\\URDF\\BOTZO_URDF_description\\urdf\\BOTZO_URDF\\BOTZO_URDF.usd",
+        usd_path="C:\\Users\\grego\\Desktop\\GRINGO\\botzo\\botzo\\CAD_files\\URDF\\botzo\\botzo.usd",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -27,9 +27,7 @@ BOTZO_CONFIG = ArticulationCfg(
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.1),
         joint_pos={
-            ".*_HAA": 0.0,
-            ".*_HFE": 0.86,
-            ".*_KFE": 0.0,
+            "Revolute_.*": 0.0,
         },
         joint_vel={".*": 0.0},
         # ROTATE ROBOT UPSIDE DOWN
@@ -62,23 +60,32 @@ BOTZO_CONFIG = ArticulationCfg(
         #     friction=0.0,
         # ),
 
+        "legs": ImplicitActuatorCfg(
+            # all joints are: Revolute_1, Revolute_2, Revolute_3, ...
+            joint_names_expr=["Revolute_.*"],
+            effort_limit_sim=10000.0,
+            velocity_limit=150.0,
+            stiffness=15000.0,
+            damping=1000.0,
+        ),
+
         # "legs": ImplicitActuatorCfg(
         #     joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
-        #     effort_limit_sim=5000.0,
-        #     velocity_limit=100.0,
-        #     stiffness=15000.0,
-        #     damping=1000.0,
+        #     effort_limit_sim=500.0,
+        #     velocity_limit=50.0,
+        #     stiffness=1500.0,
+        #     damping=200.0,
         # ),
 
-        "base_legs": DCMotorCfg(
-            joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
-            effort_limit=2.5,          # Nm (≈ 25 kg·cm)
-            saturation_effort=2.5,     # Nm
-            velocity_limit=7.5,        # rad/s (≈ 0.13 s/60°)
-            stiffness=130.0,            # servo tries to hold position rigidly
-            damping=1.0,               # slightly more damping due to gear friction
-            friction=0.1,              # internal gear friction
-        ),
+        #"base_legs": DCMotorCfg(
+        #    joint_names_expr=[".*_HAA", ".*_HFE", ".*_KFE"],
+        #    effort_limit=25,          # Nm (≈ 25 kg·cm)
+        #    saturation_effort=10.5,     # Nm
+        #    velocity_limit=7.5,        # rad/s (≈ 0.13 s/60°)
+        #    stiffness=130.0,            # servo tries to hold position rigidly
+        #    damping=2.0,               # slightly more damping due to gear friction
+        #    friction=0.1,              # internal gear friction
+        #),
     },
 
 )
